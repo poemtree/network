@@ -1,0 +1,14 @@
+package t2;
+
+public class Main {
+	class Thread1 implements Runnable {
+		@Override
+		public void run() {
+			
+		}
+	}
+	public static void main(String[] args) {
+		
+	}
+
+}

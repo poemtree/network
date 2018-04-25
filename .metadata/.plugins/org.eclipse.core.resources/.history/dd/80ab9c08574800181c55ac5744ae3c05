@@ -1,0 +1,59 @@
+package day01;
+
+public class T1 {
+	public static void main(String[] args) {
+		Thread1 t1 = new Thread1("T1");
+		Thread t2 = new Thread(new Thread2("T2"));
+		
+		t1.start();
+		t2.start();
+	}
+	
+}
+
+
+class Thread1 extends Thread {
+	
+	String msg;
+	boolean flag = true;
+		
+	public Thread1(String msg) {
+		this.msg = msg;
+	}
+	
+	@Override
+	public void run() {
+		int i = 0;
+		while(flag) {
+			System.out.println(msg+" "+i);
+			i++;
+			try{
+				Thread.sleep(300);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}
+
+class Thread2 implements Runnable {
+	String msg;
+	boolean flag = true;
+	public Thread2(String msg) {
+		this.msg = msg;
+	}
+	
+	@Override
+	public void run() {
+		int i = 0;
+		while(flag) {
+			System.out.println(msg+" "+i);
+			i++;
+			try{
+				Thread.sleep(300);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}

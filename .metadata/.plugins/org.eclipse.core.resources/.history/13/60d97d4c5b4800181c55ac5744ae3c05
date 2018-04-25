@@ -1,0 +1,42 @@
+package t2;
+
+public class Main {
+	
+	class R1 implements Runnable {
+		private boolean flag;
+		private int result;
+		
+		public void setFlag(boolean flag) {
+			this.flag = flag;
+		}
+		public int getResult() {
+			return this.result;
+		}
+		
+		@Override
+		public void run() {
+			while(flag) {
+				result++;
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	};
+	
+	public void start() {
+		R1 r1 = new R1();
+		Thread t = new Thread(r1);
+		t.start();
+		r1.setFlag(false);
+	}
+	
+	public static void main(String[] args) {
+		Main main = new Main();
+		main.start();
+	}
+
+}
