@@ -1,11 +1,12 @@
 package tcp3;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class Server {
 	
@@ -14,12 +15,12 @@ public class Server {
 	boolean connection;
 	Thread receiver;
 	Thread sender;
-	Scanner scn;
+	BufferedReader br;
 	
 	public Server() throws IOException {
 		port = 7777;
 		serverSocket = new ServerSocket(port);
-		scn = new Scanner(System.in);
+		br = new BufferedReader(new InputStreamReader(System.in));
 	}
 	
 	public void startServer() throws IOException {
@@ -66,10 +67,10 @@ public class Server {
 			while (connection) {
 				try {
 					receiveMessage = in.readUTF();
-					if(receiveMessage.equals("!@#!@#")) {
+					if(receiveMessage.equals("q")) {
 						connection = false;
 						receiveMessage = "Disconnected";
-						scn.close();
+						br.close();
 						System.out.println("Scanner ²¨Á®¶ó Á»");
 					}
 					System.out.println(receiveMessage);
@@ -107,20 +108,30 @@ public class Server {
 		public void run() {
 			while (connection) {
 				try {
-					sendMessage = scn.nextLine();
+					while(!br.ready()) {
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					sendMessage = br.readLine();
 					out.writeUTF(client + " " + sendMessage);
 				} catch (IOException e) {
 					connection = false;
 				}
 			}
-			if(scn != null) {
-				scn.close();
+			if(br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 			if (out != null) {
 				try {
 					out.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

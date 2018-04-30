@@ -123,7 +123,6 @@ public class Client {
 			while (connection) {
 				sendMessage = scn.nextLine();
 				if(sendMessage.equals("q")){
-					sendMessage = "!@#!@#";
 					connection = false;
 				} else {
 					sendMessage = client + " " + sendMessage;
