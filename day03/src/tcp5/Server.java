@@ -3,7 +3,6 @@ package tcp5;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
@@ -114,7 +113,6 @@ public class Server {
 		public void run() {
 			URL url = null;
 			HttpURLConnection con = null;
-			OutputStreamWriter osw = null;
 			
 			try {
 				url = new URL(adr);
