@@ -12,23 +12,27 @@ import java.util.HashMap;
 
 public class Server extends Thread {
 
-    private final int port = 8888;
+    private int port;
     private ServerSocket serverSocket;
     private boolean flag;
     private HashMap<String, DataOutputStream> map;
+    private boolean rflag;
 	
     public Server() {
     	flag = true;
+    	rflag = true;
+    	port = 9999;
         map = new HashMap<>();
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException e) {
-            e.printStackTrace();
+        	System.out.println("비정상적으로 종료 되었습니다...Receiver(0)");
         }
  
     }
  
     public void run() {
+    	System.out.println("Server starts...");
         while(flag) {
             try {
                 Socket socket = serverSocket.accept();
@@ -37,61 +41,90 @@ public class Server extends Thread {
                 System.out.printf("Client Num(%d)\n", map.size());
                 receiver.start();
             } catch (IOException e) {
-                e.printStackTrace();
+            	System.out.println("비정상적으로 종료 되었습니다...Server(1)");
             }
         }
+    }
+    
+    class Sender extends Thread {
+    	
+    	private String sendMessage;
+    	private String address;
+    	
+    	public Sender(String address, String sendMessage) {
+    		this.address = address;
+    		this.sendMessage = sendMessage;
+    	}
+    	
+    	@Override
+    	public void run() {
+    		try {
+	    		for(String adr : map.keySet()) {
+	                if(!adr.equals(address)) {            
+						map.get(adr).writeUTF(sendMessage);
+	                }
+	            }
+    		} catch (IOException e) {
+    			System.out.println("비정상적으로 종료 되었습니다...Sender");
+			}
+    	}
     }
     
     class Receiver implements Runnable {
         private Socket socket;
         private String address;
         private DataInputStream dis;
+        private DataOutputStream dos;
         private String receiveMessage;
-
-        public Receiver(Socket socket) throws IOException {
+        
+        public Receiver(Socket socket) {
             this.socket = socket;
+           
             address = this.socket.getInetAddress().toString();
-            dis = new DataInputStream(this.socket.getInputStream());
-            map.put(address, new DataOutputStream(this.socket.getOutputStream()));
+            try {
+				dis = new DataInputStream(this.socket.getInputStream());
+				dos = new DataOutputStream(this.socket.getOutputStream());
+				map.put(address, dos);
+			} catch (IOException e) {
+				System.out.println("비정상적으로 종료 되었습니다...Receiver(0)");
+			}
+            
         }
 
         @Override
         public void run() {
-            while(dis != null) {
-                try {
-                    receiveMessage = dis.readUTF();
-                    new SendHttp(receiveMessage).start();
-                    if(receiveMessage.equals("q")) {
-                        receiveMessage = "Disconnected.." + address;
-                        break;
-                    } else {
-                        receiveMessage = address + " : " + receiveMessage;
-                    }
-                    for(String adr : map.keySet()) {
-                        if(!adr.equals(address)) {
-                            map.get(adr).writeUTF(receiveMessage);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    break;
-                }
-            }
-            try {
-                if(dis != null)
-                    dis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                if(socket != null)
-                    socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+        	try {
+		        while(rflag) {
+		            	receiveMessage = dis.readUTF();     	
+		                if(receiveMessage.equals("q")) {
+		                	map.remove(address);
+		                    receiveMessage = "Disconnected.." + address;
+		                    break;
+		                } else {
+		                    receiveMessage = address + " : " + receiveMessage;
+		                }
+		                new Sender(address, receiveMessage).start();
+		        }
+		        
+            } catch (Exception e) {
+            	System.out.println("비정상적으로 종료 되었습니다...Receiver(1)");
+             
+            } finally {
+	            try {
+	                if(dis != null)
+	                    dis.close();
+	            } catch (IOException e) {
+	                System.out.println("비정상적으로 종료 되었습니다...Receiver(2)");
+	            }
+	            try {
+	                if(socket != null)
+	                    socket.close();
+	            } catch (IOException e) {
+	            	System.out.println("비정상적으로 종료 되었습니다...Receiver(3)");
+	            }
+	
+	        }
         }
-
     }
 
     class SendHttp extends Thread {
@@ -121,14 +154,11 @@ public class Server extends Thread {
                 con.getInputStream();
                 System.out.println("Http OK");
             } catch (MalformedURLException e) {
-                e.printStackTrace();
-                System.out.println("Http Error");
+                System.out.println("Http Error...(0)");
             } catch (IOException e) {
-                e.printStackTrace();
+            	System.out.println("Http Error...(1)");
             }
         }
     }
     
 }
-
-
